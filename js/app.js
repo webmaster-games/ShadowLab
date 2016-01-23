@@ -43,6 +43,7 @@ resources.onReady(init);
 
 var player = {
     pos: [canvas.width/2, canvas.height/2],
+    size: [64,64],
     sprite: new Sprite('img/player-sprite.png', [0, 0], [64, 64], 4, [0, 1, 2, 3]),
     speed: 100,
     visibleRadius: 100,
@@ -101,7 +102,7 @@ function render() {
 
 function renderEntity(entity) {
     ctx.save();
-    ctx.translate(entity.pos[0], entity.pos[1]);
+    ctx.translate(entity.pos[0]-entity.size[0]/2, entity.pos[1]-entity.size[1]/2);
     entity.sprite.render(ctx);
     ctx.restore();
 }

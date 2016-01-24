@@ -12,7 +12,7 @@ var requestAnimFrame = (function(){
 
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = 980;
+canvas.width = 450;
 canvas.height = 450;
 document.body.appendChild(canvas);
 
@@ -91,7 +91,9 @@ var player = {
     speed: 100,
     visibleRadius: 100,
 };
-
+var camera = {
+    pos: [0,0],
+}
 function update(dt){
 	//gameTime += dt;
 
@@ -112,8 +114,8 @@ function handleInput(dt) {
             }
             if(!flag){
     	       player.pos[1] += player.speed * dt;
-            }            
-            //ctx.translate(0,-player.speed * dt);
+            }
+
     	    player.sprite.pos = [0,0];
     	    player.sprite.update(dt);
 
@@ -129,7 +131,7 @@ function handleInput(dt) {
             if(!flag){
     	       player.pos[1] -= player.speed * dt;
             }
-            //ctx.translate(0,player.speed * dt);
+
     	    player.sprite.pos = [0,196];
     	    player.sprite.update(dt);
     	}
@@ -144,7 +146,7 @@ function handleInput(dt) {
             if(!flag){
     	       player.pos[0] -= player.speed * dt;
             }
-            //ctx.translate(player.speed * dt, 0);
+
     	    player.sprite.pos = [0,64];
     	    player.sprite.update(dt);
     	}
@@ -159,7 +161,7 @@ function handleInput(dt) {
             if(!flag){
     	       player.pos[0] += player.speed * dt;
             }
-            //ctx.translate(-player.speed * dt,0);
+
     	    player.sprite.pos = [0,128];
     	    player.sprite.update(dt);
     	}
@@ -171,6 +173,7 @@ function updateEntities(dt) {
 }
 
 function render() {
+    
     ctx.fillStyle = "black";
     ctx.fillRect(0,0,canvas.width, canvas.height);
 
@@ -182,7 +185,7 @@ function render() {
     ctx.fillRect(player.pos[0] + player.size[0]/2 + player.visibleRadius, 0, canvas.width, player.visibleRadius*2);
     ctx.fillRect(player.pos[0] + player.size[0]/2 - player.visibleRadius, player.pos[1] + player.size[1]/2 + player.visibleRadius, canvas.width, canvas.height);
     */
-    renderEntity(player);
+    renderEntity(player);    
 }
 function renderMap() {
     for(var i = 0; i < walls.length; i++) {
@@ -219,7 +222,7 @@ function isCollide(pos, size, pos2, size2){
 
 function renderEntity(entity) {
     ctx.save();
-    ctx.translate( entity.pos[0], entity.pos[1] + entity.size[1] - entity.sprite.size[1]);
+    ctx.translate( entity.pos[0] - player.pos[0] + 196, entity.pos[1] + entity.size[1] - entity.sprite.size[1] - player.pos[1] +196 );
     entity.sprite.render(ctx);
     ctx.restore();
 }

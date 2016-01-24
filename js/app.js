@@ -19,15 +19,20 @@ document.body.appendChild(canvas);
 
 var lastTime;
 function main() {
-	var now = Date.now();
-    var dt = (now - lastTime) / 1000.0;
+    if(!isGameOver){
+	   var now = Date.now();
+        var dt = (now - lastTime) / 1000.0;
 
-    update(dt);
+        update(dt);
 
-    render();
+        render();
 
-    lastTime = now;
-    requestAnimFrame(main);
+        lastTime = now;
+        requestAnimFrame(main);
+    }else{
+        document.getElementById('win-game').style.display = 'block';
+        document.getElementById('win-game-overlay').style.display = 'block';
+    }
 };
 function init() {
     //terrainPattern = ctx.createPattern(resources.get('img/terrain-one.png'), 'repeat');
@@ -40,19 +45,31 @@ function generateMap() {
     var j;
     for (i = 0; i < map.length; i++){
         for (j = 0; j < map[i].length; j++){
-            if(map[i][j] == 1){
-                walls.push({
-                    pos: [i*64,j*64],
-                    size: [64,64],
-                    sprite: new Sprite('img/wall-sprite.png', [0,0],[64,64],0),
-                });
-            }else{
-                spaces.push({
-                    pos: [i*64,j*64],
-                    size: [64,64],
-                    sprite: new Sprite('img/space-sprite.png', [0,0],[64,64],0),
-                });
-            }
+            switch(map[i][j]){
+                case 1:
+                    walls.push({
+                        pos: [j*64,i*64],
+                        size: [64,64],
+                        sprite: new Sprite('img/wall-sprite.png', [0,0],[64,64],0),
+                    });
+                    break;
+                case 2:
+                    exits.push({
+                        pos: [j*64,i*64],
+                        size: [64,64],
+                        sprite: new Sprite('img/exit-sprite.png', [0,0],[64,64],0),
+                    });
+                    break;
+                case 0:
+                    spaces.push({
+                        pos: [j*64,i*64],
+                        size: [64,64],
+                        sprite: new Sprite('img/space-sprite.png', [0,0],[64,64],0),
+                    });
+                    break;
+                default:
+                    break;
+            }            
         }
     }
 }
@@ -62,28 +79,30 @@ resources.load([
     'img/space-sprite.png',
     'img/wall-sprite.png',
     'img/terrain-one.png',
+    'img/exit-sprite.png',
 ]);
 resources.onReady(init);
 var map = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1],
-    [1,0,1,1,1,1,1,1,1,0,0,1,1,0,1,1],
-    [1,0,0,0,0,0,1,1,1,0,1,1,1,0,1,1],
-    [1,1,1,0,0,0,1,1,1,0,0,1,1,0,1,1],
-    [1,1,1,0,0,0,1,1,0,0,0,1,1,0,1,1],
-    [1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1],
-    [1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1],
-    [1,1,0,0,0,1,1,0,0,1,1,1,1,0,1,1],
-    [1,1,0,1,1,1,1,0,1,1,1,1,1,0,1,1],
-    [1,1,0,0,0,1,1,0,0,0,0,0,1,0,1,1],
-    [1,1,1,1,0,1,1,1,1,0,0,0,1,0,1,1],
-    [1,1,1,1,0,1,1,1,1,1,0,0,1,1,1,1],
-    [1,1,1,1,0,0,1,1,1,1,1,0,1,1,1,1],
-    [1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1],
+    [1,0,1,1,1,0,0,0,1,0,0,0,0,0,1,1],
+    [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1],
+    [1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1],
+    [1,1,1,0,0,0,0,0,0,0,0,1,1,0,1,1],
+    [1,1,1,0,0,0,1,1,0,0,0,0,1,0,1,1],
+    [1,1,1,1,0,1,1,1,0,1,1,0,1,0,1,1],
+    [1,1,1,1,0,1,1,1,0,0,0,0,1,0,1,1],
+    [1,1,0,0,0,0,0,0,0,1,1,0,1,0,1,1],
+    [1,1,0,1,1,1,1,0,1,1,1,1,1,0,0,1],
+    [1,1,0,0,0,1,1,0,0,0,0,0,1,0,0,1],
+    [1,1,1,1,0,0,0,0,1,0,1,0,1,0,1,1],
+    [1,0,1,1,0,1,1,0,1,2,1,0,1,0,1,1],
+    [1,0,0,0,0,0,1,0,1,1,1,0,1,0,1,1],
+    [1,1,0,1,1,0,0,0,0,0,0,0,1,0,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 ];
 var walls = [];
 var spaces = [];
+var exits = [];
 var player = {
     pos: [64, 64],
     size: [64,64],
@@ -91,14 +110,25 @@ var player = {
     speed: 100,
     visibleRadius: 100,
 };
-var camera = {
-    pos: [0,0],
-}
+
+var isGameOver = false;
 function update(dt){
 	//gameTime += dt;
 
     handleInput(dt);
     updateEntities(dt);
+
+    checkWin();
+}
+function checkWin(){
+    for(var i = 0; i < exits.length; i++) {
+        if(isCollide([player.pos[0],player.pos[1]],player.size,exits[i].pos,exits[i].size)){
+            WinGame();
+        }
+    }
+}
+function WinGame(){
+    isGameOver = true;
 }
 function handleInput(dt) {
 	if (input.isNothingToDo()){
@@ -196,6 +226,11 @@ function renderMap() {
     for(i = 0; i < spaces.length; i++) {
         if(isVisible(spaces[i].pos,spaces[i].size)){
             renderEntity(spaces[i]);
+        }
+    }
+    for(i = 0; i < exits.length; i++) {
+        if(isVisible(exits[i].pos,exits[i].size)){
+            renderEntity(exits[i]);
         }
     }
 }

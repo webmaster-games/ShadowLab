@@ -104,24 +104,30 @@ function handleInput(dt) {
     	player.sprite.reset();
 	}else{
     	if(input.isDown('DOWN') || input.isDown('s')) {
-    	    player.pos[1] += player.speed * dt;
+            var flag = false
             for(var i = 0; i < walls.length; i++) {
-                if(isCollide(walls[i],player)){
-                    player.pos[1] = walls[i].pos[1]-player.size[1];
-                    break;
+                if(isCollide([player.pos[0],player.pos[1]+player.speed*dt],player.size,walls[i].pos,walls[i].size)){
+                    flag = true;
                 }
             }
+            if(!flag){
+    	       player.pos[1] += player.speed * dt;
+            }            
             //ctx.translate(0,-player.speed * dt);
     	    player.sprite.pos = [0,0];
     	    player.sprite.update(dt);
+
     	}
 
     	if(input.isDown('UP') || input.isDown('w')) {
-    	    player.pos[1] -= player.speed * dt;
+            var flag = false
             for(var i = 0; i < walls.length; i++) {
-                if(isCollide(walls[i],player)){
-                    player.pos[1] = walls[i].pos[1]+walls[i].size[1];break;
+                if(isCollide([player.pos[0],player.pos[1]-player.speed*dt],player.size,walls[i].pos,walls[i].size)){
+                    flag = true;
                 }
+            }
+            if(!flag){
+    	       player.pos[1] -= player.speed * dt;
             }
             //ctx.translate(0,player.speed * dt);
     	    player.sprite.pos = [0,196];
@@ -129,11 +135,14 @@ function handleInput(dt) {
     	}
 
     	if(input.isDown('LEFT') || input.isDown('a')) {
-    	    player.pos[0] -= player.speed * dt;
+            var flag = false
             for(var i = 0; i < walls.length; i++) {
-                if(isCollide(walls[i],player)){
-                    player.pos[0] = walls[i].pos[0]+walls[i].size[0];break;
+                if(isCollide([player.pos[0]-player.speed*dt,player.pos[1]],player.size,walls[i].pos,walls[i].size)){
+                    flag = true;
                 }
+            }
+            if(!flag){
+    	       player.pos[0] -= player.speed * dt;
             }
             //ctx.translate(player.speed * dt, 0);
     	    player.sprite.pos = [0,64];
@@ -141,11 +150,14 @@ function handleInput(dt) {
     	}
 
     	if(input.isDown('RIGHT') || input.isDown('d')) {
-    	    player.pos[0] += player.speed * dt;
+            var flag = false
             for(var i = 0; i < walls.length; i++) {
-                if(isCollide(walls[i],player)){
-                    player.pos[0] = walls[i].pos[0]-player.size[0];break;
+                if(isCollide([player.pos[0]+player.speed*dt,player.pos[1]],player.size,walls[i].pos,walls[i].size)){
+                    flag = true;
                 }
+            }
+            if(!flag){
+    	       player.pos[0] += player.speed * dt;
             }
             //ctx.translate(-player.speed * dt,0);
     	    player.sprite.pos = [0,128];
@@ -194,16 +206,17 @@ function isVisible(pos,size) {
             return true;
     return false;
 }
-function isCollide(entity, entity2){
-    var entityX = entity.pos[0]+entity.size[0]/2;
-    var entity2X = entity2.pos[0]+entity2.size[0]/2;
-    var entityY = entity.pos[1]+entity.size[1]/2;
-    var entity2Y = entity2.pos[1]+entity2.size[1]/2;
-    if(Math.abs(entityX - entity2X) < (entity.size[0] + entity2.size[0])/2)
-       if(Math.abs(entityY - entity2Y) < (entity.size[1] + entity2.size[1])/2) 
+function isCollide(pos, size, pos2, size2){
+    var entityX = pos[0]+size[0]/2;
+    var entity2X = pos2[0]+size2[0]/2;
+    var entityY = pos[1]+size[1]/2;
+    var entity2Y = pos2[1]+size2[1]/2;
+    if(Math.abs(entityX - entity2X)+10 < (size[0] + size2[0])/2)
+       if(Math.abs(entityY - entity2Y)+10 < (size[1] + size2[1])/2) 
         return true;
     return false;
 }
+
 function renderEntity(entity) {
     ctx.save();
     ctx.translate( entity.pos[0], entity.pos[1] + entity.size[1] - entity.sprite.size[1]);
